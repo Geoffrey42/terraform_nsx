@@ -1,0 +1,107 @@
+# Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-only
+---
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  vars_files:
+    - answerfile.yml
+
+
+  tasks:
+    - name: Create web VM from template
+      vmware_guest:
+        validate_certs: False
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username}}"
+        password: "{{ vcenter_password}}"
+        datacenter: "{{ vsphere_datacenter }}"
+        cluster: "{{ vsphere_cluster }}"
+        folder: "{{ vsphere_folder }}"
+        name: "{{ vm_name[0].name }}_deployed_by_ansible"
+        template: "{{ vm_template }}"
+        disk:
+          - size_gb: "{{ vm_disk_size }}"
+            type: thin
+            datastore: "{{ vsphere_datastore }}"
+        networks:
+          - name: "{{ vm_network[0].name }}"
+            ip: "{{ vm_ip[0].addr }}"
+            netmask: 255.255.255.0
+            gateway: "{{ vm_ip[0].gw }}"
+        customization:
+          hostname: "{{ vm_name[0].name }}-deployed_by_ansible"
+          domain: cpod-jfc.az-lab.swhrfr.com
+          dns_servers:
+            - 172.20.4.1
+          dns_suffix:
+            - cpod-jfc.az-lab.swhrfr.com
+        hardware:
+          memory_mb: "{{ vm_memory }}"
+        wait_for_ip_address: True
+        state: present
+
+    - name: Create app VM from template
+      vmware_guest:
+        validate_certs: False
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username}}"
+        password: "{{ vcenter_password}}"
+        datacenter: "{{ vsphere_datacenter }}"
+        cluster: "{{ vsphere_cluster }}"
+        folder: "{{ vsphere_folder }}"
+        name: "{{ vm_name[1].name }}_deployed_by_ansible"
+        template: "{{ vm_template }}"
+        disk:
+          - size_gb: "{{ vm_disk_size }}"
+            type: thin
+            datastore: "{{ vsphere_datastore }}"
+        networks:
+          - name: "{{ vm_network[1].name }}"
+            ip: "{{ vm_ip[1].addr }}"
+            netmask: 255.255.255.0
+            gateway: "{{ vm_ip[1].gw }}"
+        customization:
+          hostname: "{{ vm_name[1].name }}-deployed_by_ansible"
+          domain: cpod-jfc.az-lab.swhrfr.com
+          dns_servers:
+            - 172.20.4.1
+          dns_suffix:
+            - cpod-jfc.az-lab.swhrfr.com
+        hardware:
+          memory_mb: "{{ vm_memory }}"
+        wait_for_ip_address: True
+        state: present
+
+    - name: Create db VM from template
+      vmware_guest:
+        validate_certs: False
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username}}"
+        password: "{{ vcenter_password}}"
+        datacenter: "{{ vsphere_datacenter }}"
+        cluster: "{{ vsphere_cluster }}"
+        folder: "{{ vsphere_folder }}"
+        name: "{{ vm_name[2].name }}_deployed_by_ansible"
+        template: "{{ vm_template }}"
+        disk:
+          - size_gb: "{{ vm_disk_size }}"
+            type: thin
+            datastore: "{{ vsphere_datastore }}"
+        networks:
+          - name: "{{ vm_network[2].name }}"
+            ip: "{{ vm_ip[2].addr }}"
+            netmask: 255.255.255.0
+            gateway: "{{ vm_ip[2].gw }}"
+        customization:
+          hostname: "{{ vm_name[2].name }}-deployed_by_ansible"
+          domain: cpod-jfc.az-lab.swhrfr.com
+          dns_servers:
+            - 172.20.4.1
+          dns_suffix:
+            - cpod-jfc.az-lab.swhrfr.com
+        hardware:
+          memory_mb: "{{ vm_memory }}"
+        wait_for_ip_address: True
+        state: present
+

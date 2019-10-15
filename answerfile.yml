@@ -1,0 +1,51 @@
+---
+#hostname: nsx-mgr-01.cpod-jfc.az-lab.shwrfr.com
+hostname: 172.20.4.4
+username: admin
+password: VMware1!VMware1!
+validate_certs: False
+
+vcenter_hostname: 172.20.4.3
+#vcenter_hostname: vcsa.cpod-jfc.az-lab.shwrfr.com
+vcenter_username: administrator@cpod-jfc.az-lab.shwrfr.com
+vcenter_password: pdrmFcIYTUc3Ebq!
+validate_certs: False
+
+vsphere_datacenter: cPod-JFC
+vsphere_cluster: Compute
+vsphere_datastore: Datastore
+vsphere_folder: Ansible
+
+vm_template: ubuntu
+vm_disk_size: 16
+vm_memory: 2048
+
+ls:  
+  - { name: "web", tz: "tz-overlay" }
+  - { name: "app", tz: "tz-overlay" }
+  - { name: "db", tz: "tz-overlay" }
+
+router:
+  - { name: "2ND-T0" }
+  - { name: "Ansible-T1" }
+
+router_ip:
+  - { addr: "192.168.168.1" }
+  - { addr: "192.168.169.1" }
+  - { addr: "192.168.170.1" }
+
+vm_network:
+  - { name: "web-ls" }
+  - { name: "app-ls" }
+  - { name: "db-ls" }
+
+vm_name:
+  - { name: "web-vm" }
+  - { name: "app-vm" }
+  - { name: "db-vm" }
+
+vm_ip:
+  - { addr: "192.168.168.11", gw: "192.168.168.1" }
+  - { addr: "192.168.169.11", gw: "192.168.169.1" }
+  - { addr: "192.168.170.11", gw: "192.168.170.1" }
+

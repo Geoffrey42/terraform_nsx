@@ -1,0 +1,159 @@
+# Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-only
+---
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  vars_files:
+    - answerfile.yml
+  tasks:
+# Delete Downlink Ports on Router
+#
+    - name: Delete logical router port on web-ls
+
+      nsxt_logical_router_ports:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "test-lrp-web-ls"
+        resource_type: "LogicalRouterDownLinkPort"
+        logical_router_name: "{{ router[1].name }}"
+        state: "absent"
+      register: lrpwebls
+
+    - debug:
+        msg: "{{ lrpwebls }}"
+
+    - name: Delete logical port on web-ls
+      nsxt_logical_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "{{ ls[0].name }}-lp"
+        logical_switch_name: "{{ ls[0].name }}-ls"
+        admin_state: "UP"
+        state: "absent"
+      register: lpwebls
+
+    - debug:
+        msg: "{{ lpwebls }}"
+
+    - name: Delete logical router port on app-ls
+
+      nsxt_logical_router_ports:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "test-lrp-app-ls"
+        resource_type: "LogicalRouterDownLinkPort"
+        logical_router_name: "{{ router[1].name }}"
+        state: "absent"
+      register: lrpappls
+
+    - debug:
+        msg: "{{ lrpappls }}"
+
+    - name: Delete logical port on app-ls
+      nsxt_logical_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "{{ ls[1].name }}-lp"
+        logical_switch_name: "{{ ls[1].name }}-ls"
+        admin_state: "UP"
+        state: "absent"
+      register: lpappls
+
+    - debug:
+        msg: "{{ lpappls }}"
+
+    - name: Delete logical router port on db-ls
+
+      nsxt_logical_router_ports:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "test-lrp-db-ls"
+        resource_type: "LogicalRouterDownLinkPort"
+        logical_router_name: "{{ router[1].name }}"
+        state: "absent"
+      register: lrpdbls
+
+    - debug:
+        msg: "{{ lrpdbls }}"
+
+    - name: Delete logical port on db-ls
+      nsxt_logical_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "{{ ls[2].name }}-lp"
+        logical_switch_name: "{{ ls[2].name }}-ls"
+        admin_state: "UP"
+        state: "absent"
+      register: lpdbls
+
+    - debug:
+        msg: "{{ lpdbls }}"
+
+
+# Delete T1 T0 link
+#
+
+    - name: Delete logical router port on T1
+
+      nsxt_logical_router_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "RLP-on-T1"
+        resource_type: "LogicalRouterLinkPortOnTIER1"
+        logical_router_name: "{{ router[1].name }}"
+        state: "absent"
+      register: rlpt1
+
+    - debug:
+        msg: "{{ rlpt1 }}"
+
+    - name: Delete logical router port on T0
+
+      nsxt_logical_router_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "RLP-on-T0"
+        resource_type: "LogicalRouterLinkPortOnTIER0"
+        logical_router_name: "{{ router[0].name }}"
+        state: "absent"
+      register: rlpt0
+
+    - debug:
+        msg: "{{ rlpt0 }}"
+        
+
+      
+# Delete T1
+#
+    - name: Delete logical router
+      nsxt_logical_routers:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "{{ router[1].name }}"
+        router_type: "TIER1"
+        state: "absent"
+      register: t1_lr
+
+    - debug:
+        msg: "{{ t1_lr }}"
+
+

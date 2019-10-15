@@ -1,0 +1,190 @@
+# Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-only
+---
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  vars_files:
+    - answerfile.yml
+
+# Create T1
+#
+  tasks:
+    - name: Create logical router
+      nsxt_logical_routers:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "{{ router[1].name }}"
+        router_type: "TIER1"
+        state: "present"
+      register: t1_lr
+
+    - debug:
+        msg: "{{ t1_lr }}"
+
+    - name: Toggle tier 1 route advertisement
+      nsxt_route_advertise:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        display_name: "{{ router[1].name }}"
+        validate_certs: False
+        enabled: "True"
+        advertise_nsx_connected_routes: "True"
+
+# Create Downlink Ports
+#
+    - name: Create logical port on web-ls
+      nsxt_logical_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "{{ ls[0].name }}-lp"
+        logical_switch_name: "{{ ls[0].name }}-ls"
+        admin_state: "UP"
+        state: "present"
+      register: lpwebls
+
+    - debug:
+        msg: "{{ lpwebls }}"
+
+
+    - name: Create logical router port on web-ls
+      nsxt_logical_router_ports:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "test-lrp-web-ls"
+        resource_type: "LogicalRouterDownLinkPort"
+        logical_router_name: "{{ router[1].name }}"
+        linked_logical_switch_port_id:
+          target_type: "LogicalPort"
+          target_id: "{{ lpwebls.id }}"
+        subnets:
+        - ip_addresses:
+          - "{{ router_ip[0].addr }}"
+          prefix_length: 24
+        state: "present"
+      register: lrpwebls
+
+    - debug:
+        msg: "{{ lrpwebls }}"
+
+
+    - name: Create logical port on app-ls
+      nsxt_logical_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "{{ ls[1].name }}-lp"
+        logical_switch_name: "{{ ls[1].name }}-ls"
+        admin_state: "UP"
+        state: "present"
+      register: lpappls
+
+    - debug:
+        msg: "{{ lpappls }}"
+
+
+    - name: Create logical router port on app-ls
+      nsxt_logical_router_ports:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "test-lrp-app-ls"
+        resource_type: "LogicalRouterDownLinkPort"
+        logical_router_name: "{{ router[1].name }}"
+        linked_logical_switch_port_id:
+          target_type: "LogicalPort"
+          target_id: "{{ lpappls.id }}"
+        subnets:
+        - ip_addresses:
+          - "{{ router_ip[1].addr }}"
+          prefix_length: 24
+        state: "present"
+      register: lrpappls
+
+    - debug:
+        msg: "{{ lrpappls }}"
+
+    - name: Create logical port on db-ls
+      nsxt_logical_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "{{ ls[2].name }}-lp"
+        logical_switch_name: "{{ ls[2].name }}-ls"
+        admin_state: "UP"
+        state: "present"
+      register: lpdbls
+
+    - debug:
+        msg: "{{ lpdbls }}"
+
+
+    - name: Create logical router port on db-ls
+      nsxt_logical_router_ports:
+        hostname: "{{hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+        validate_certs: False
+        display_name: "test-lrp-db-ls"
+        resource_type: "LogicalRouterDownLinkPort"
+        logical_router_name: "{{ router[1].name }}"
+        linked_logical_switch_port_id:
+          target_type: "LogicalPort"
+          target_id: "{{ lpdbls.id }}"
+        subnets:
+        - ip_addresses:
+          - "{{ router_ip[2].addr }}"
+          prefix_length: 24
+        state: "present"
+      register: lrpdbls
+
+    - debug:
+        msg: "{{ lrpdbls }}"
+
+# Connect T1 to T0
+#
+    - name: Create logical router port on T0
+
+      nsxt_logical_router_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "RLP-on-T0"
+        resource_type: "LogicalRouterLinkPortOnTIER0"
+        logical_router_name: "{{ router[0].name }}"
+        state: "present"
+      register: rlpt0
+
+    - debug:
+        msg: "{{ rlpt0.id }}"
+
+    - name: Create logical router port on T1
+
+      nsxt_logical_router_ports:
+        hostname: "{{ hostname }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        validate_certs: False
+        display_name: "RLP-on-T1"
+        resource_type: "LogicalRouterLinkPortOnTIER1"
+        logical_router_name: "{{ router[1].name }}"
+        linked_logical_router_port_id:
+          target_id: "{{ rlpt0.id }}"
+          target_type: "LogicalRouterLinkPortOnTIER0"
+        state: "present"
+      register: rlpt1
+
+    - debug:
+        msg: "{{ rlpt1.id }}"
+
